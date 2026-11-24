@@ -35,7 +35,7 @@ class MainWindow(QMainWindow):
         # print("cliclre")        
         
         city_name = "Dnipro"
-        api_key = "2e9b4aae53dbe7a119d5a280fd52d174"
+        api_key = 
         response = requests.get(
             f"https://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={api_key}"
         )
