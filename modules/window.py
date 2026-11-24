@@ -1,7 +1,16 @@
-from PyQt6.QtWidgets import QMainWindow, QHBoxLayout, QPushButton, QFrame
-from PyQt6.QtGui import QMouseEvent
+from PyQt6.QtWidgets import QLabel, QMainWindow, QHBoxLayout, QPushButton, QFrame
+# PyQt6.QtGui — это модуль библиотеки PyQt6, который содержит классы для работы с:
+# графикой, изображениями, шрифтами, цветами и другими визуальными элементами.
+from PyQt6.QtGui import QImage, QMouseEvent, QPixmap
 from PyQt6.QtCore import Qt
+
+from PIL import Image
+from PIL.ImageQt import ImageQt
+
+import os
+import dotenv
 import requests
+
 #setFixedSize - встановлює фіксований розмір лише  ширини та  висоти
 #setGeometry - встановлює позицію х та у ширину та висоту
 
@@ -37,41 +46,48 @@ class MainWindow(QMainWindow):
         self.main_layout.addWidget(self.button)
         self.button.clicked.connect(self.button_clicked)
 
+        # 1. Открываем изображение
+        # Image — класс из библиотеки Pillow для работы с изображениями.
+        # open() — метод, который открывает изображение по указанному пути.
+        image = Image.open("assets/images/images.jpg")
+
+        # 2. Преобразуем изображение для Qt
+        # ImageQt() преобразует изображение Pillow в формат, с которым может работать Qt (PyQt6).
+        # Это необходимо, потому что Pillow и PyQt6 используют разные классы для работы с изображениями.
+        QtImage = ImageQt(image)
+
+        # 3. Создаём QPixmap
+        # QImage — класс Qt для хранения и обработки изображений.
+        # QPixmap — класс Qt, предназначенный для отображения изображений в интерфейсе.
+        pixmap = QPixmap(QImage(QtImage))
+
+        # 4. Задаём размер изображения
+        # Метод scaled() изменяет размер изображения до 200 × 200 пикселей.
+        pixmap = pixmap.scaled(200, 200)
+
+        # 5. Создаём область для изображения
+        # QLabel используется для отображения текста или изображений в окне приложения.
+        self.label = QLabel(parent=self)
+
+        # 6. Устанавливаем размер области
+        self.label.setFixedSize(200, 200)
+
+        # 7. Отображаем изображение
+        # Метод setPixmap() помещает изображение внутрь QLabel.
+        self.label.setPixmap(pixmap)
+
     def button_clicked(self):
-        # Указываем название города, для которого хотим получить информацию о погоде.
-        # В дальнейшем пользователь сможет самостоятельно вводить название города.
+        dotenv.load_dotenv()
+       
         city_name = "Dnipro"
+        api_key = os.getenv("API_KEY")
 
-
-        # API-ключ — это специальный код, который выдаётся сайтом.
-        # Он позволяет нашей программе пользоваться возможностями этого сайта.
-        # Многие сайты требуют такой ключ, чтобы понимать, кто обращается к их сервису.
-        api_key = "api_key"
-
-
-        # requests.get() используется для получения информации из интернета.
-        # С его помощью наша программа обращается к другому сайту и просит предоставить данные.
-        #
-        # Внутри мы указываем специальный адрес сайта (URL).
-        # q={city_name} — передаём название города, погоду которого хотим узнать.
-        # appid={api_key} — передаём наш специальный ключ.
-        #
-        # Полученную от сайта информацию сохраняем в переменную response.
         response = requests.get(
             f"https://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={api_key}"
         )
 
-
-        # .json() используется для получения информации в специальном формате JSON.
-        # Этот формат часто используется сайтами для передачи информации между программами.
-        # Благодаря ему Python может удобно работать с полученными данными.
-        #
-        # Результат сохраняем в переменную response_data.
         response_data = response.json()
 
-
-        # print() выводит полученную информацию в консоль.
-        # В результате мы увидим данные о погоде выбранного города.
         print(response_data)
 
     # a0 - це параметр (аргумент) який зберігає об'єкт події
